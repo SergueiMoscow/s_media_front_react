@@ -1,0 +1,15 @@
+services:
+  front:
+    image: ghcr.io/sergueimoscow/s_media_front_react:latest
+    build:
+      context: .
+      args:
+        VITE_BACKEND_URL: ${BACKEND_URL:-https://stage.b-site.ru:8000}
+    container_name: s_media_front_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certbot/www:/var/www/certbot:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: always
