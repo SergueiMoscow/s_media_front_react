@@ -18,6 +18,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InsightsIcon from '@mui/icons-material/Insights';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -51,6 +52,7 @@ export default function AppLayout() {
     { title: 'Домашняя', path: '/', icon: <HomeOutlinedIcon />, requiresAuth: false },
     { title: 'Хранилища', path: '/folder_content', icon: <FolderOutlinedIcon />, requiresAuth: true },
     { title: 'Серверы', path: '/storages', icon: <DnsOutlinedIcon />, requiresAuth: true },
+    { title: 'Анализатор', path: '/analyzer', icon: <InsightsIcon />, requiresAuth: true },
     { title: 'О системе', path: '/about', icon: <InfoOutlinedIcon />, requiresAuth: false },
   ];
 

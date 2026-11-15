@@ -10,6 +10,11 @@ import type {
   Server,
   Storage,
 } from '../types/models';
+import type {
+  AnalyzerQueuePage,
+  AnalyzerQueueParams,
+  AnalyzerStats,
+} from '../types/analyzer';
 
 // ---------------------------------------------------------------------------
 // Аутентификация
@@ -172,6 +177,25 @@ export async function saveFileInfo(
 }
 
 // ---------------------------------------------------------------------------
+// Анализатор (статус воркера)
+// ---------------------------------------------------------------------------
+
+export async function fetchAnalyzerStats(serverId: string): Promise<AnalyzerStats> {
+  const response = await apiClient.get<AnalyzerStats>(`/analyzer/${serverId}/stats`);
+  return response.data;
+}
+
+export async function fetchAnalyzerQueue(
+  serverId: string,
+  params: AnalyzerQueueParams = {},
+): Promise<AnalyzerQueuePage> {
+  const response = await apiClient.get<AnalyzerQueuePage>(`/analyzer/${serverId}/queue`, {
+    params,
+  });
+  return response.data;
+}
+
+// ---------------------------------------------------------------------------
 // Ключи TanStack Query
 // ---------------------------------------------------------------------------
 
@@ -187,4 +211,7 @@ export const queryKeys = {
   catalogContent: (serverId: string, storageId: string, params: RequestParams) =>
     ['catalogContent', serverId, storageId, params] as const,
   tags: (serverId: string) => ['tags', serverId] as const,
+  analyzerStats: (serverId: string) => ['analyzerStats', serverId] as const,
+  analyzerQueue: (serverId: string, params: AnalyzerQueueParams) =>
+    ['analyzerQueue', serverId, params] as const,
 };

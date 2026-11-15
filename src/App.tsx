@@ -8,6 +8,8 @@ import LoginPage from './pages/LoginPage';
 import StoragesPage from './pages/StoragesPage';
 import FolderContentPage from './pages/FolderContentPage';
 import CatalogContentPage from './pages/CatalogContentPage';
+import AnalyzerPage from './pages/AnalyzerPage';
+import AnalyzerDetailPage from './pages/AnalyzerDetailPage';
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
                 path="catalog_content/:server_id/:storage_id"
                 element={<CatalogContentPage />}
               />
+              <Route path="analyzer" element={<AnalyzerPage />} />
+              <Route path="analyzer/:server_id" element={<AnalyzerDetailPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
