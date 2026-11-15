@@ -79,7 +79,7 @@ export default function FileCard({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          bgcolor: '#fafafa',
+          bgcolor: 'action.hover',
           minHeight: 180,
         }}
       >

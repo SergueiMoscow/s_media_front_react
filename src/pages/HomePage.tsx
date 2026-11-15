@@ -4,6 +4,7 @@ import { fetchMain, queryKeys } from '../api';
 import { errorMessageFromResponse } from '../api/client';
 import { formatDate, formatSize } from '../utils/format';
 import { catalogPreviewUrl } from '../utils/media';
+import EmptyState from '../components/EmptyState';
 
 export default function HomePage() {
   const mainQuery = useQuery({
@@ -34,19 +35,17 @@ export default function HomePage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" align="center" gutterBottom>
+      <Typography variant="h5" align="center" gutterBottom>
         Каталогизатор систем хранения изображений.
       </Typography>
 
       {files.length === 0 ? (
-        <Typography align="center" color="text.secondary" sx={{ py: 6 }}>
-          Нет файлов в каталоге.
-        </Typography>
+        <EmptyState message="Нет файлов в каталоге." />
       ) : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
           {files.map((file) => (
             <Card key={file.id} sx={{ width: 300 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'center', bgcolor: '#fafafa', minHeight: 160 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', bgcolor: 'action.hover', minHeight: 160 }}>
                 <img
                   src={catalogPreviewUrl(file.server_id ?? '', file.id)}
                   alt={file.note ?? ''}

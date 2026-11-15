@@ -6,6 +6,7 @@ import { fetchAnalyzerStats, fetchServers, queryKeys } from '../api';
 import { errorMessageFromResponse } from '../api/client';
 import type { Server } from '../types/models';
 import AnalyzerSummary from '../components/AnalyzerSummary';
+import EmptyState from '../components/EmptyState';
 import { analyzerErrorMessage } from '../utils/analyzer';
 
 function ServerCard({ server, onOpen }: { server: Server; onOpen: () => void }) {
@@ -81,7 +82,7 @@ export default function AnalyzerPage() {
       </Typography>
 
       {servers.length === 0 ? (
-        <Typography color="text.secondary">Нет серверов.</Typography>
+        <EmptyState message="Нет серверов." />
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {servers.map((server) => (

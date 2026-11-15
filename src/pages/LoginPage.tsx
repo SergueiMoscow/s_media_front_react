@@ -38,11 +38,11 @@ export default function LoginPage() {
       <Card sx={{ width: '100%', maxWidth: 400, p: 2 }}>
         <CardContent>
           <Typography variant="h5" align="center" gutterBottom>
-            Sign in
+            Войти
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
-              label="Name"
+              label="Имя пользователя"
               required
               autoComplete="username"
               value={username}
@@ -50,7 +50,7 @@ export default function LoginPage() {
               fullWidth
             />
             <TextField
-              label="Password"
+              label="Пароль"
               type="password"
               required
               autoComplete="current-password"
@@ -60,7 +60,7 @@ export default function LoginPage() {
             />
             {error && <Alert severity="error">{error}</Alert>}
             <Button type="submit" variant="contained" disabled={loading} fullWidth>
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Войти'}
             </Button>
           </Box>
         </CardContent>

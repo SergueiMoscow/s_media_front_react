@@ -19,12 +19,15 @@ import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import InsightsIcon from '@mui/icons-material/Insights';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchStorages, queryKeys } from '../../api';
 import { useAuth } from '../../auth/AuthContext';
+import { useColorMode } from '../../ColorModeContext';
 
 const DRAWER_WIDTH = 260;
 
@@ -39,6 +42,7 @@ export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [catalogsOpen, setCatalogsOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
+  const { mode, toggleColorMode } = useColorMode();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -87,6 +91,9 @@ export default function AppLayout() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Media Explorer
           </Typography>
+          <IconButton color="inherit" onClick={toggleColorMode} aria-label="Переключить тему">
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
           {isAuthenticated ? (
             <Button color="inherit" onClick={handleLogout}>
               Выйти

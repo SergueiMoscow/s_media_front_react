@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Box, CircularProgress, Typography } from '@mui/material';
+import { Alert, Box, CircularProgress } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import FileCard from '../components/FileCard';
 import FilterPanel from '../components/FilterPanel';
 import PaginationBar from '../components/PaginationBar';
 import Lightbox from '../components/Lightbox';
+import EmptyState from '../components/EmptyState';
 
 export default function CatalogContentPage() {
   const { server_id: serverId = '', storage_id: storageId = '' } = useParams();
@@ -61,7 +62,7 @@ export default function CatalogContentPage() {
   }
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 3 }}>
       <FilterPanel filter={filter} allTags={tagsQuery.data ?? []} onChange={setFilter} />
 
       {catalogQuery.isLoading && (
@@ -83,9 +84,7 @@ export default function CatalogContentPage() {
       {catalogQuery.isSuccess && (
         <>
           {catalogQuery.data.files.length === 0 ? (
-            <Typography align="center" color="text.secondary" sx={{ py: 6 }}>
-              Ничего не найдено.
-            </Typography>
+            <EmptyState message="Ничего не найдено." />
           ) : (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {catalogQuery.data.files.map((file) => (

@@ -193,7 +193,7 @@ function FaceThumb({ serverId, faceId }: { serverId: string; faceId: number }) {
         width: 48,
         height: 48,
         mx: 'auto',
-        bgcolor: 'grey.200',
+        bgcolor: 'action.hover',
         borderRadius: 1,
         display: 'flex',
         alignItems: 'center',

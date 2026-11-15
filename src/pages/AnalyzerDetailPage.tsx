@@ -26,6 +26,7 @@ import type { AnalyzerKind, AnalyzerStatus } from '../types/analyzer';
 import AnalyzerSummary from '../components/AnalyzerSummary';
 import AnalyzerQueueRow from '../components/AnalyzerQueueRow';
 import PaginationBar from '../components/PaginationBar';
+import EmptyState from '../components/EmptyState';
 import { KIND_LABELS, STATUS_LABELS, analyzerErrorMessage } from '../utils/analyzer';
 
 const LIMIT = 50;
@@ -172,7 +173,7 @@ export default function AnalyzerDetailPage() {
             ) : queueQuery.isError ? (
               <Alert severity="warning">{analyzerErrorMessage(queueQuery.error)}</Alert>
             ) : queueQuery.data && queueQuery.data.items.length === 0 ? (
-              <Typography color="text.secondary">Очередь пуста.</Typography>
+              <EmptyState message="Очередь пуста." />
             ) : queueQuery.data ? (
               <>
                 <TableContainer component={Paper} variant="outlined">

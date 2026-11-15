@@ -200,7 +200,7 @@ export default function StoragesPage() {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 3 }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         {/* Серверы */}
         <Card sx={{ flex: 1 }}>

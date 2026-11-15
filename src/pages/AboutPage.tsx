@@ -3,7 +3,7 @@ import { Box, Link, List, ListItem, Typography } from '@mui/material';
 export default function AboutPage() {
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Typography variant="h4" align="center" gutterBottom>
+      <Typography variant="h5" align="center" gutterBottom>
         Media Explorer
       </Typography>
       <Typography component="p" sx={{ mb: 1.5 }}>

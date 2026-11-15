@@ -12,6 +12,7 @@ import FileCard from '../components/FileCard';
 import FolderBreadcrumbs from '../components/FolderBreadcrumbs';
 import PaginationBar from '../components/PaginationBar';
 import Lightbox from '../components/Lightbox';
+import EmptyState from '../components/EmptyState';
 
 const PAGE_SIZE = 20;
 
@@ -90,7 +91,7 @@ export default function FolderContentPage() {
           </Alert>
         )}
         {!serversContentQuery.isLoading && folders.length === 0 && (
-          <Typography color="text.secondary">Нет хранилищ.</Typography>
+          <EmptyState message="Нет хранилищ." />
         )}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           {folders.map((folder) => (
@@ -133,7 +134,7 @@ export default function FolderContentPage() {
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">Хранилище: {storageName}</Typography>
+        <Typography variant="h5">Хранилище: {storageName}</Typography>
         <FolderBreadcrumbs server={server} storage={storage} folderPath={folderPath} />
       </Box>
 
@@ -169,7 +170,7 @@ export default function FolderContentPage() {
       )}
 
       {folders.length === 0 && files.length === 0 && (
-        <Typography color="text.secondary">Папка пуста.</Typography>
+        <EmptyState message="Папка пуста." />
       )}
 
       <PaginationBar
