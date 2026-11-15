@@ -16,6 +16,7 @@ export interface AnalyzerKindCounts {
 export interface AnalyzerProcessingItem {
   scanned_file_id: number;
   catalog_file_id: string | null;
+  storage_id: string;
   folder_path: string;
   filename: string;
   kind: AnalyzerKind;
@@ -37,6 +38,7 @@ export interface AnalyzerStats {
 export interface AnalyzerQueueItem {
   scanned_file_id: number;
   catalog_file_id: string | null;
+  storage_id: string;
   folder_path: string;
   filename: string;
   kind: AnalyzerKind;
@@ -46,6 +48,7 @@ export interface AnalyzerQueueItem {
   locked_at: string | null;
   processed_at: string | null;
   analyzer_version: number;
+  faces_count: number | null;
 }
 
 export interface AnalyzerQueuePage {
@@ -60,4 +63,32 @@ export interface AnalyzerQueueParams {
   status?: AnalyzerStatus;
   limit?: number;
   offset?: number;
+}
+
+export type AnalyzerFaceStatus = 'auto' | 'confirmed' | 'rejected';
+
+export interface AnalyzerFace {
+  id: number;
+  scanned_file_id: number;
+  catalog_file_id: string | null;
+  bbox: { x: number; y: number; w: number; h: number };
+  det_score: number;
+  cluster_id: number | null;
+  person_id: string | null;
+  person_name: string | null;
+  match_score: number | null;
+  status: AnalyzerFaceStatus;
+  has_crop: boolean;
+}
+
+export type AnalyzerGeoSource = 'exif' | 'video' | 'manual';
+
+export interface AnalyzerGeo {
+  scanned_file_id: number;
+  catalog_file_id: string | null;
+  lat: number;
+  lon: number;
+  alt: number | null;
+  taken_at: string | null;
+  source: AnalyzerGeoSource;
 }

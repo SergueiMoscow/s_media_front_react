@@ -18,7 +18,12 @@ export function isVideoType(type?: string): boolean {
  * - файл из хранилища (есть name): /preview/{server}/{storage}/?folder=…&filename=…
  * - файл из каталога (есть id):   /preview/{server}/{id}/
  */
-export function previewUrl(server: string, storage: string, file: FileObject, folderPath = ''): string {
+export function previewUrl(
+  server: string,
+  storage: string,
+  file: Pick<FileObject, 'name' | 'id'>,
+  folderPath = '',
+): string {
   if (file.name) {
     return `${BASE_URL}/preview/${server}/${storage}/?folder=${encodeURIComponent(folderPath)}&filename=${encodeURIComponent(file.name)}`;
   }
@@ -29,7 +34,12 @@ export function previewUrl(server: string, storage: string, file: FileObject, fo
 }
 
 /** URL файла целиком (для видео). */
-export function fileUrl(server: string, storage: string, file: FileObject, folderPath = ''): string {
+export function fileUrl(
+  server: string,
+  storage: string,
+  file: Pick<FileObject, 'name' | 'id'>,
+  folderPath = '',
+): string {
   if (file.name) {
     return `${BASE_URL}/file/${server}/${storage}/?folder=${encodeURIComponent(folderPath)}&filename=${encodeURIComponent(file.name)}`;
   }

@@ -11,6 +11,8 @@ import type {
   Storage,
 } from '../types/models';
 import type {
+  AnalyzerFace,
+  AnalyzerGeo,
   AnalyzerQueuePage,
   AnalyzerQueueParams,
   AnalyzerStats,
@@ -196,6 +198,38 @@ export async function fetchAnalyzerQueue(
   return response.data;
 }
 
+export async function fetchAnalyzerFaces(
+  serverId: string,
+  scannedFileId: number,
+): Promise<AnalyzerFace[]> {
+  const response = await apiClient.get<AnalyzerFace[]>(
+    `/analyzer/${serverId}/scanned-files/${scannedFileId}/faces`,
+  );
+  return response.data;
+}
+
+export async function fetchAnalyzerGeo(
+  serverId: string,
+  scannedFileId: number,
+): Promise<AnalyzerGeo> {
+  const response = await apiClient.get<AnalyzerGeo>(
+    `/analyzer/${serverId}/scanned-files/${scannedFileId}/geo`,
+  );
+  return response.data;
+}
+
+export async function fetchAnalyzerFaceThumbnail(
+  serverId: string,
+  faceId: number,
+): Promise<string> {
+  const response = await apiClient.get<ArrayBuffer>(
+    `/analyzer/${serverId}/faces/${faceId}/thumbnail`,
+    { responseType: 'arraybuffer' },
+  );
+  const base64 = arrayBufferToBase64(response.data);
+  return base64 ? `data:image/jpeg;base64,${base64}` : '';
+}
+
 // ---------------------------------------------------------------------------
 // Ключи TanStack Query
 // ---------------------------------------------------------------------------
@@ -215,4 +249,10 @@ export const queryKeys = {
   analyzerStats: (serverId: string) => ['analyzerStats', serverId] as const,
   analyzerQueue: (serverId: string, params: AnalyzerQueueParams) =>
     ['analyzerQueue', serverId, params] as const,
+  analyzerFaces: (serverId: string, scannedFileId: number) =>
+    ['analyzerFaces', serverId, scannedFileId] as const,
+  analyzerGeo: (serverId: string, scannedFileId: number) =>
+    ['analyzerGeo', serverId, scannedFileId] as const,
+  analyzerFaceThumbnail: (serverId: string, faceId: number) =>
+    ['analyzerFaceThumbnail', serverId, faceId] as const,
 };

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Alert,
   Box,
-  Chip,
   CircularProgress,
   FormControl,
   InputLabel,
@@ -25,15 +24,9 @@ import { fetchAnalyzerQueue, fetchAnalyzerStats, fetchServers, queryKeys } from 
 import { errorMessageFromResponse } from '../api/client';
 import type { AnalyzerKind, AnalyzerStatus } from '../types/analyzer';
 import AnalyzerSummary from '../components/AnalyzerSummary';
+import AnalyzerQueueRow from '../components/AnalyzerQueueRow';
 import PaginationBar from '../components/PaginationBar';
-import {
-  KIND_LABELS,
-  STATUS_COLORS,
-  STATUS_LABELS,
-  analyzerErrorMessage,
-  analyzerFilePath,
-} from '../utils/analyzer';
-import { formatDate } from '../utils/format';
+import { KIND_LABELS, STATUS_LABELS, analyzerErrorMessage } from '../utils/analyzer';
 
 const LIMIT = 50;
 
@@ -196,24 +189,7 @@ export default function AnalyzerDetailPage() {
                     </TableHead>
                     <TableBody>
                       {queueQuery.data.items.map((item) => (
-                        <TableRow key={item.scanned_file_id}>
-                          <TableCell sx={{ wordBreak: 'break-all' }}>
-                            {analyzerFilePath(item)}
-                          </TableCell>
-                          <TableCell>{KIND_LABELS[item.kind]}</TableCell>
-                          <TableCell>
-                            <Chip
-                              size="small"
-                              color={STATUS_COLORS[item.status]}
-                              label={STATUS_LABELS[item.status]}
-                            />
-                          </TableCell>
-                          <TableCell>{item.attempts}</TableCell>
-                          <TableCell sx={{ wordBreak: 'break-word' }}>
-                            {item.error ?? ''}
-                          </TableCell>
-                          <TableCell>{formatDate(item.processed_at)}</TableCell>
-                        </TableRow>
+                        <AnalyzerQueueRow key={item.scanned_file_id} serverId={serverId} item={item} />
                       ))}
                     </TableBody>
                   </Table>

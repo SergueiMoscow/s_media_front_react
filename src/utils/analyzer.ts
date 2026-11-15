@@ -36,3 +36,8 @@ export function analyzerErrorMessage(error: unknown): string {
   const data = axios.isAxiosError(error) ? error.response?.data : undefined;
   return errorMessageFromResponse(data) || 'Не удалось получить данные анализатора';
 }
+
+/** 404 от анализатора (например, «нет геотега»), а не «не настроен». */
+export function isNotFound(error: unknown): boolean {
+  return axios.isAxiosError(error) && error.response?.status === 404;
+}
