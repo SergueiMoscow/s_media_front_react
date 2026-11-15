@@ -36,7 +36,8 @@ export async function loginRequest(username: string, password: string): Promise<
 
 export async function fetchServers(): Promise<Server[]> {
   const response = await apiClient.get<{ results: Server[] }>('/servers/');
-  return response.data.results;
+  // API отдаёт id числом (автоинкремент), а тип Server.id объявлен строкой — приводим.
+  return response.data.results.map((s) => ({ ...s, id: String(s.id) }));
 }
 
 export async function createServer(data: { name: string; url: string }): Promise<void> {
