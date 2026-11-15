@@ -1,5 +1,5 @@
 import { Box, Chip, Paper, Typography } from '@mui/material';
-import type { AnalyzerKind, AnalyzerStats } from '../types/analyzer';
+import type { AnalyzerKind, AnalyzerKindCounts, AnalyzerStats } from '../types/analyzer';
 import { KIND_LABELS } from '../utils/analyzer';
 
 const KINDS: AnalyzerKind[] = ['faces', 'geo'];
@@ -14,27 +14,24 @@ export default function AnalyzerSummary({ stats }: AnalyzerSummaryProps) {
     <Box>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
         {KINDS.map((kind) => {
-          const counts = stats.queue[kind] ?? {
-            pending: 0,
-            processing: 0,
-            done: 0,
-            failed: 0,
-            skipped: 0,
-          };
-          const remaining = counts.pending + counts.processing;
+          const counts: Partial<AnalyzerKindCounts> = stats.queue[kind] ?? {};
+          const done = counts.done ?? 0;
+          const remaining = (counts.pending ?? 0) + (counts.processing ?? 0);
+          const failed = counts.failed ?? 0;
+          const skipped = counts.skipped ?? 0;
           return (
             <Paper key={kind} variant="outlined" sx={{ p: 1.5, minWidth: 200, flex: 1 }}>
               <Typography variant="subtitle2">{KIND_LABELS[kind]}</Typography>
-              <Typography variant="body2">Обработано: {counts.done}</Typography>
+              <Typography variant="body2">Обработано: {done}</Typography>
               <Typography variant="body2">Осталось: {remaining}</Typography>
-              {counts.failed > 0 && (
+              {failed > 0 && (
                 <Typography variant="body2" color="error">
-                  Ошибок: {counts.failed}
+                  Ошибок: {failed}
                 </Typography>
               )}
-              {counts.skipped > 0 && (
+              {skipped > 0 && (
                 <Typography variant="body2" color="warning.main">
-                  Пропущено: {counts.skipped}
+                  Пропущено: {skipped}
                 </Typography>
               )}
             </Paper>
