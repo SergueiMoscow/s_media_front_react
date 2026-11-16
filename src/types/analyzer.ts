@@ -71,6 +71,9 @@ export interface AnalyzerFace {
   id: number;
   scanned_file_id: number;
   catalog_file_id: string | null;
+  storage_id: string | null;
+  folder_path: string | null;
+  filename: string | null;
   bbox: { x: number; y: number; w: number; h: number };
   det_score: number;
   cluster_id: number | null;

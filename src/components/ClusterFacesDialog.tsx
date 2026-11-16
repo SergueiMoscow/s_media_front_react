@@ -19,7 +19,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { fetchClusterFaces, patchFace, queryKeys } from '../api';
 import { errorMessageFromResponse } from '../api/client';
-import { catalogPreviewUrl } from '../utils/media';
+import { fileUrl } from '../utils/media';
 import type { AnalyzerFace, AnalyzerFaceStatus, FaceCluster } from '../types/analyzer';
 import FaceThumb from './FaceThumb';
 import NameClusterDialog, { type AssignBody } from './NameClusterDialog';
@@ -27,6 +27,16 @@ import PaginationBar from './PaginationBar';
 import { useToast } from './ToastContext';
 
 const PAGE_SIZE = 24;
+
+function facePhotoUrl(serverId: string, face: AnalyzerFace): string {
+  if (face.catalog_file_id) {
+    return fileUrl(serverId, '', { id: face.catalog_file_id }, '');
+  }
+  if (face.storage_id && face.filename) {
+    return fileUrl(serverId, face.storage_id, { name: face.filename }, face.folder_path ?? '');
+  }
+  return '';
+}
 
 interface ClusterFacesDialogProps {
   serverId: string;
@@ -214,20 +224,23 @@ export default function ClusterFacesDialog({
                         gap: 0.25,
                       }}
                     >
-                      {face.catalog_file_id ? (
-                        <Link
-                          href={catalogPreviewUrl(serverId, face.catalog_file_id)}
-                          target="_blank"
-                          rel="noreferrer"
-                          variant="caption"
-                        >
-                          Фото
-                        </Link>
-                      ) : (
-                        <Typography variant="caption" color="text.secondary">
-                          —
-                        </Typography>
-                      )}
+                      {(() => {
+                        const photoUrl = facePhotoUrl(serverId, face);
+                        return photoUrl ? (
+                          <Link
+                            href={photoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            variant="caption"
+                          >
+                            Фото
+                          </Link>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            —
+                          </Typography>
+                        );
+                      })()}
                       {face.person_id && (
                         <Button
                           size="small"
