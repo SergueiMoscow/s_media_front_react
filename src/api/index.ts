@@ -16,6 +16,11 @@ import type {
   AnalyzerQueuePage,
   AnalyzerQueueParams,
   AnalyzerStats,
+  ClustersParams,
+  FaceCluster,
+  Page,
+  PeopleParams,
+  Person,
 } from '../types/analyzer';
 
 // ---------------------------------------------------------------------------
@@ -230,6 +235,60 @@ export async function fetchAnalyzerFaceThumbnail(
   return base64 ? `data:image/jpeg;base64,${base64}` : '';
 }
 
+export async function fetchClusters(
+  serverId: string,
+  params: ClustersParams = {},
+): Promise<Page<FaceCluster>> {
+  const response = await apiClient.get<Page<FaceCluster>>(
+    `/analyzer/${serverId}/clusters`,
+    { params },
+  );
+  return response.data;
+}
+
+export async function fetchPeople(
+  serverId: string,
+  params: PeopleParams = {},
+): Promise<Page<Person>> {
+  const response = await apiClient.get<Page<Person>>(`/analyzer/${serverId}/people`, {
+    params,
+  });
+  return response.data;
+}
+
+export async function fetchClusterFaces(
+  serverId: string,
+  clusterId: number,
+  params: { limit?: number; offset?: number } = {},
+): Promise<Page<AnalyzerFace>> {
+  const response = await apiClient.get<Page<AnalyzerFace>>(
+    `/analyzer/${serverId}/clusters/${clusterId}/faces`,
+    { params },
+  );
+  return response.data;
+}
+
+export async function assignCluster(
+  serverId: string,
+  clusterId: number,
+  body: { person_id: string; name: string; promote: boolean },
+): Promise<void> {
+  await apiClient.post(`/analyzer/${serverId}/clusters/${clusterId}/assign`, body);
+}
+
+export async function setClusterIgnored(
+  serverId: string,
+  clusterId: number,
+  ignored: boolean,
+): Promise<void> {
+  const path = `/analyzer/${serverId}/clusters/${clusterId}/ignore`;
+  if (ignored) {
+    await apiClient.post(path);
+  } else {
+    await apiClient.delete(path);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Ключи TanStack Query
 // ---------------------------------------------------------------------------
@@ -255,4 +314,10 @@ export const queryKeys = {
     ['analyzerGeo', serverId, scannedFileId] as const,
   analyzerFaceThumbnail: (serverId: string, faceId: number) =>
     ['analyzerFaceThumbnail', serverId, faceId] as const,
+  clusters: (serverId: string, params: ClustersParams) =>
+    ['clusters', serverId, params] as const,
+  people: (serverId: string, params: PeopleParams) =>
+    ['people', serverId, params] as const,
+  clusterFaces: (serverId: string, clusterId: number, params: { limit?: number; offset?: number }) =>
+    ['clusterFaces', serverId, clusterId, params] as const,
 };

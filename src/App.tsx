@@ -10,6 +10,7 @@ import FolderContentPage from './pages/FolderContentPage';
 import CatalogContentPage from './pages/CatalogContentPage';
 import AnalyzerPage from './pages/AnalyzerPage';
 import AnalyzerDetailPage from './pages/AnalyzerDetailPage';
+import FacesPage from './pages/FacesPage';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
               />
               <Route path="analyzer" element={<AnalyzerPage />} />
               <Route path="analyzer/:server_id" element={<AnalyzerDetailPage />} />
+              <Route path="faces" element={<FacesPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

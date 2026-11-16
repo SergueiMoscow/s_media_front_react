@@ -19,6 +19,7 @@ import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import InsightsIcon from '@mui/icons-material/Insights';
+import FaceOutlinedIcon from '@mui/icons-material/FaceOutlined';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -57,6 +58,7 @@ export default function AppLayout() {
     { title: 'Хранилища', path: '/folder_content', icon: <FolderOutlinedIcon />, requiresAuth: true },
     { title: 'Серверы', path: '/storages', icon: <DnsOutlinedIcon />, requiresAuth: true },
     { title: 'Анализатор', path: '/analyzer', icon: <InsightsIcon />, requiresAuth: true },
+    { title: 'Лица', path: '/faces', icon: <FaceOutlinedIcon />, requiresAuth: true },
     { title: 'О системе', path: '/about', icon: <InfoOutlinedIcon />, requiresAuth: false },
   ];
 

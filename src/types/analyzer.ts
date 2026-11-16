@@ -92,3 +92,39 @@ export interface AnalyzerGeo {
   taken_at: string | null;
   source: AnalyzerGeoSource;
 }
+
+/** Страница результатов с пагинацией offset/limit (аналог Page[T] анализатора). */
+export interface Page<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface FaceCluster {
+  id: number;
+  size: number;
+  person_id: string | null;
+  person_name: string | null;
+  ignored: boolean;
+  sample_face_ids: number[];
+}
+
+export interface Person {
+  person_id: string;
+  names: string[];
+}
+
+export interface ClustersParams {
+  unassigned?: boolean;
+  ignored?: boolean;
+  min_size?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PeopleParams {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
