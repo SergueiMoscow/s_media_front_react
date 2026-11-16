@@ -25,6 +25,7 @@ import type { ClustersParams, FaceCluster } from '../types/analyzer';
 import LazyFaceThumb from '../components/LazyFaceThumb';
 import NameClusterDialog, { type AssignBody } from '../components/NameClusterDialog';
 import ClusterFacesDialog from '../components/ClusterFacesDialog';
+import CandidatesDialog from '../components/CandidatesDialog';
 import EmptyState from '../components/EmptyState';
 import PaginationBar from '../components/PaginationBar';
 import { useToast } from '../components/ToastContext';
@@ -44,6 +45,7 @@ export default function FacesPage() {
   const [page, setPage] = useState(1);
   const [nameTarget, setNameTarget] = useState<FaceCluster | null>(null);
   const [viewTarget, setViewTarget] = useState<FaceCluster | null>(null);
+  const [candidatesTarget, setCandidatesTarget] = useState<FaceCluster | null>(null);
   const [assignLoading, setAssignLoading] = useState(false);
 
   const serversQuery = useQuery({ queryKey: queryKeys.servers, queryFn: fetchServers });
@@ -230,10 +232,15 @@ export default function FacesPage() {
                     )}
                   </CardContent>
                 </CardActionArea>
-                <CardActions>
+                <CardActions sx={{ flexWrap: 'wrap', gap: 0.5 }}>
                   <Button size="small" onClick={() => setNameTarget(cluster)}>
                     Назвать
                   </Button>
+                  {cluster.person_id && (
+                    <Button size="small" onClick={() => setCandidatesTarget(cluster)}>
+                      Похожие
+                    </Button>
+                  )}
                   <Button
                     size="small"
                     color={cluster.ignored ? 'primary' : 'inherit'}
@@ -264,6 +271,16 @@ export default function FacesPage() {
           serverId={serverId}
           cluster={viewTarget}
           onClose={() => setViewTarget(null)}
+        />
+      )}
+
+      {candidatesTarget && candidatesTarget.person_id && (
+        <CandidatesDialog
+          serverId={serverId}
+          personId={candidatesTarget.person_id}
+          personName={candidatesTarget.person_name ?? ''}
+          onClustersChanged={invalidateClusters}
+          onClose={() => setCandidatesTarget(null)}
         />
       )}
     </Box>

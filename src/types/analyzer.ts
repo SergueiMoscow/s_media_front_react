@@ -128,3 +128,15 @@ export interface PeopleParams {
   limit?: number;
   offset?: number;
 }
+
+export interface CandidateCluster {
+  cluster_id: number;
+  size: number;
+  sample_face_ids: number[];
+  similarity: number;
+}
+
+export interface CandidatesParams {
+  limit?: number;
+  min_similarity?: number;
+}

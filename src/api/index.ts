@@ -16,6 +16,8 @@ import type {
   AnalyzerQueuePage,
   AnalyzerQueueParams,
   AnalyzerStats,
+  CandidateCluster,
+  CandidatesParams,
   ClustersParams,
   FaceCluster,
   Page,
@@ -289,6 +291,28 @@ export async function setClusterIgnored(
   }
 }
 
+export async function fetchCandidates(
+  serverId: string,
+  personId: string,
+  params: CandidatesParams = {},
+): Promise<Page<CandidateCluster>> {
+  const response = await apiClient.get<Page<CandidateCluster>>(
+    `/analyzer/${serverId}/people/${personId}/candidates`,
+    { params },
+  );
+  return response.data;
+}
+
+export async function rejectCluster(
+  serverId: string,
+  personId: string,
+  clusterId: number,
+): Promise<void> {
+  await apiClient.post(
+    `/analyzer/${serverId}/people/${personId}/reject-cluster/${clusterId}`,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Ключи TanStack Query
 // ---------------------------------------------------------------------------
@@ -320,4 +344,6 @@ export const queryKeys = {
     ['people', serverId, params] as const,
   clusterFaces: (serverId: string, clusterId: number, params: { limit?: number; offset?: number }) =>
     ['clusterFaces', serverId, clusterId, params] as const,
+  candidates: (serverId: string, personId: string, params: CandidatesParams) =>
+    ['candidates', serverId, personId, params] as const,
 };
