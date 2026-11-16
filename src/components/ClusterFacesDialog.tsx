@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Link,
   Typography,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
@@ -19,8 +18,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { fetchClusterFaces, patchFace, queryKeys } from '../api';
 import { errorMessageFromResponse } from '../api/client';
-import { fileUrl } from '../utils/media';
+import { fileUrl, previewUrl } from '../utils/media';
 import type { AnalyzerFace, AnalyzerFaceStatus, FaceCluster } from '../types/analyzer';
+import type { FileObject } from '../types/models';
 import FaceThumb from './FaceThumb';
 import NameClusterDialog, { type AssignBody } from './NameClusterDialog';
 import PaginationBar from './PaginationBar';
@@ -28,12 +28,19 @@ import { useToast } from './ToastContext';
 
 const PAGE_SIZE = 24;
 
-function facePhotoUrl(serverId: string, face: AnalyzerFace): string {
+type UrlBuilder = (
+  server: string,
+  storage: string,
+  file: Pick<FileObject, 'name' | 'id'>,
+  folderPath?: string,
+) => string;
+
+function faceUrl(builder: UrlBuilder, serverId: string, face: AnalyzerFace): string {
   if (face.catalog_file_id) {
-    return fileUrl(serverId, '', { id: face.catalog_file_id }, '');
+    return builder(serverId, '', { id: face.catalog_file_id }, '');
   }
   if (face.storage_id && face.filename) {
-    return fileUrl(serverId, face.storage_id, { name: face.filename }, face.folder_path ?? '');
+    return builder(serverId, face.storage_id, { name: face.filename }, face.folder_path ?? '');
   }
   return '';
 }
@@ -45,7 +52,7 @@ interface ClusterFacesDialogProps {
   onClose: () => void;
 }
 
-/** Просмотр лиц кластера: статусы, пометка «✓/✗», именование выбранных лиц. */
+/** Просмотр лиц кластера: статусы, пометка «✓/✗», именование выбранных, просмотр фото. */
 export default function ClusterFacesDialog({
   serverId,
   cluster,
@@ -59,6 +66,7 @@ export default function ClusterFacesDialog({
   const [selectedFaceIds, setSelectedFaceIds] = useState<number[]>([]);
   const [namingOpen, setNamingOpen] = useState(false);
   const [namingLoading, setNamingLoading] = useState(false);
+  const [photoFace, setPhotoFace] = useState<AnalyzerFace | null>(null);
 
   const facesQuery = useQuery({
     queryKey: queryKeys.clusterFaces(serverId, cluster.id, {
@@ -195,7 +203,13 @@ export default function ClusterFacesDialog({
                       )}
                     </Box>
 
-                    <FaceThumb serverId={serverId} faceId={face.id} size={72} />
+                    <Box
+                      onClick={() => setPhotoFace(face)}
+                      sx={{ cursor: 'pointer' }}
+                      title="Открыть фото"
+                    >
+                      <FaceThumb serverId={serverId} faceId={face.id} size={72} />
+                    </Box>
 
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                       <IconButton
@@ -216,41 +230,15 @@ export default function ClusterFacesDialog({
                       </IconButton>
                     </Box>
 
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 0.25,
-                      }}
-                    >
-                      {(() => {
-                        const photoUrl = facePhotoUrl(serverId, face);
-                        return photoUrl ? (
-                          <Link
-                            href={photoUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            variant="caption"
-                          >
-                            Фото
-                          </Link>
-                        ) : (
-                          <Typography variant="caption" color="text.secondary">
-                            —
-                          </Typography>
-                        );
-                      })()}
-                      {face.person_id && (
-                        <Button
-                          size="small"
-                          onClick={() => handleUnassign(face)}
-                          sx={{ minWidth: 0, fontSize: '0.7rem' }}
-                        >
-                          снять имя
-                        </Button>
-                      )}
-                    </Box>
+                    {face.person_id && (
+                      <Button
+                        size="small"
+                        onClick={() => handleUnassign(face)}
+                        sx={{ minWidth: 0, fontSize: '0.7rem' }}
+                      >
+                        снять имя
+                      </Button>
+                    )}
                   </Box>
                 ))}
               </Box>
@@ -274,6 +262,40 @@ export default function ClusterFacesDialog({
           onClose={() => setNamingOpen(false)}
         />
       )}
+
+      <Dialog
+        open={Boolean(photoFace)}
+        onClose={() => setPhotoFace(null)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogContent>
+          {photoFace && (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <img
+                src={faceUrl(previewUrl, serverId, photoFace)}
+                alt="фото"
+                style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPhotoFace(null)} color="inherit">
+            Закрыть
+          </Button>
+          {photoFace && (
+            <Button
+              component="a"
+              href={faceUrl(fileUrl, serverId, photoFace)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Оригинал
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
