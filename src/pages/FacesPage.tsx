@@ -270,6 +270,7 @@ export default function FacesPage() {
         <ClusterFacesDialog
           serverId={serverId}
           cluster={viewTarget}
+          onClustersChanged={invalidateClusters}
           onClose={() => setViewTarget(null)}
         />
       )}

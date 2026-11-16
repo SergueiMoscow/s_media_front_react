@@ -21,6 +21,7 @@ import type {
   ClustersParams,
   FaceCluster,
   Page,
+  PatchFaceBody,
   PeopleParams,
   Person,
 } from '../types/analyzer';
@@ -311,6 +312,14 @@ export async function rejectCluster(
   await apiClient.post(
     `/analyzer/${serverId}/people/${personId}/reject-cluster/${clusterId}`,
   );
+}
+
+export async function patchFace(
+  serverId: string,
+  faceId: number,
+  body: PatchFaceBody,
+): Promise<void> {
+  await apiClient.patch(`/analyzer/${serverId}/faces/${faceId}`, body);
 }
 
 // ---------------------------------------------------------------------------

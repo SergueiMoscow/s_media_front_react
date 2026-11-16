@@ -140,3 +140,10 @@ export interface CandidatesParams {
   limit?: number;
   min_similarity?: number;
 }
+
+export interface PatchFaceBody {
+  person_id?: string;
+  status?: AnalyzerFaceStatus;
+  unassign?: boolean;
+  promote?: boolean;
+}
