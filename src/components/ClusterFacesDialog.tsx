@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -14,6 +15,9 @@ import { fetchClusterFaces, queryKeys } from '../api';
 import { catalogPreviewUrl } from '../utils/media';
 import type { FaceCluster } from '../types/analyzer';
 import FaceThumb from './FaceThumb';
+import PaginationBar from './PaginationBar';
+
+const PAGE_SIZE = 24;
 
 interface ClusterFacesDialogProps {
   serverId: string;
@@ -21,16 +25,28 @@ interface ClusterFacesDialogProps {
   onClose: () => void;
 }
 
-/** Просмотр всех лиц кластера (миниатюры + ссылка на фото при наличии catalog_file_id). */
+/** Просмотр лиц кластера постранично (миниатюры + ссылка на фото при наличии catalog_file_id). */
 export default function ClusterFacesDialog({
   serverId,
   cluster,
   onClose,
 }: ClusterFacesDialogProps) {
+  const [page, setPage] = useState(1);
+
   const facesQuery = useQuery({
-    queryKey: queryKeys.clusterFaces(serverId, cluster.id, { limit: 100 }),
-    queryFn: () => fetchClusterFaces(serverId, cluster.id, { limit: 100 }),
+    queryKey: queryKeys.clusterFaces(serverId, cluster.id, {
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+    }),
+    queryFn: () =>
+      fetchClusterFaces(serverId, cluster.id, {
+        limit: PAGE_SIZE,
+        offset: (page - 1) * PAGE_SIZE,
+      }),
   });
+
+  const total = facesQuery.data?.total ?? 0;
+  const faces = facesQuery.data?.items ?? [];
 
   return (
     <Dialog open onClose={onClose} maxWidth="md" fullWidth>
@@ -44,30 +60,34 @@ export default function ClusterFacesDialog({
           </Box>
         ) : facesQuery.isError ? (
           <Typography color="text.secondary">Не удалось загрузить лица.</Typography>
-        ) : (facesQuery.data?.items.length ?? 0) === 0 ? (
+        ) : faces.length === 0 ? (
           <Typography color="text.secondary">Лиц нет.</Typography>
         ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-            {facesQuery.data!.items.map((face) => (
-              <Box key={face.id} sx={{ textAlign: 'center', width: 96 }}>
-                <FaceThumb serverId={serverId} faceId={face.id} size={72} />
-                {face.catalog_file_id ? (
-                  <Link
-                    href={catalogPreviewUrl(serverId, face.catalog_file_id)}
-                    target="_blank"
-                    rel="noreferrer"
-                    variant="caption"
-                  >
-                    Фото
-                  </Link>
-                ) : (
-                  <Typography variant="caption" color="text.secondary">
-                    —
-                  </Typography>
-                )}
-              </Box>
-            ))}
-          </Box>
+          <>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+              {faces.map((face) => (
+                <Box key={face.id} sx={{ textAlign: 'center', width: 96 }}>
+                  <FaceThumb serverId={serverId} faceId={face.id} size={72} />
+                  {face.catalog_file_id ? (
+                    <Link
+                      href={catalogPreviewUrl(serverId, face.catalog_file_id)}
+                      target="_blank"
+                      rel="noreferrer"
+                      variant="caption"
+                    >
+                      Фото
+                    </Link>
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      —
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+
+            <PaginationBar page={page} totalItems={total} perPage={PAGE_SIZE} onChange={setPage} />
+          </>
         )}
       </DialogContent>
       <DialogActions>

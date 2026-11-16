@@ -13,6 +13,7 @@ export default function FaceThumb({ serverId, faceId, size = 48 }: FaceThumbProp
   const thumbQuery = useQuery({
     queryKey: queryKeys.analyzerFaceThumbnail(serverId, faceId),
     queryFn: () => fetchAnalyzerFaceThumbnail(serverId, faceId),
+    staleTime: Infinity,
   });
 
   return (

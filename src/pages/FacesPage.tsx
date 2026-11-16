@@ -22,7 +22,7 @@ import axios from 'axios';
 import { assignCluster, fetchClusters, fetchServers, queryKeys, setClusterIgnored } from '../api';
 import { errorMessageFromResponse } from '../api/client';
 import type { ClustersParams, FaceCluster } from '../types/analyzer';
-import FaceThumb from '../components/FaceThumb';
+import LazyFaceThumb from '../components/LazyFaceThumb';
 import NameClusterDialog, { type AssignBody } from '../components/NameClusterDialog';
 import ClusterFacesDialog from '../components/ClusterFacesDialog';
 import EmptyState from '../components/EmptyState';
@@ -205,7 +205,7 @@ export default function FacesPage() {
                 <CardActionArea onClick={() => setViewTarget(cluster)}>
                   <Box sx={{ display: 'flex', justifyContent: 'center', p: 1 }}>
                     {cluster.sample_face_ids[0] != null ? (
-                      <FaceThumb
+                      <LazyFaceThumb
                         serverId={serverId}
                         faceId={cluster.sample_face_ids[0]}
                         size={96}
