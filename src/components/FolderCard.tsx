@@ -76,7 +76,14 @@ export default function FolderCard({ folder, server, storage, parentPath = '' }:
           <img
             src={collageQuery.data}
             alt="collage"
-            style={{ maxWidth: '100%', maxHeight: 140, objectFit: 'contain', cursor: 'pointer' }}
+            style={{
+              maxWidth: '100%',
+              maxHeight: 140,
+              objectFit: 'contain',
+              cursor: 'pointer',
+              display: 'block',
+              margin: '0 auto',
+            }}
             onClick={handleClick}
           />
         ) : null}

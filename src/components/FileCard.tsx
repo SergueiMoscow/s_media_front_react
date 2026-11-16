@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   Checkbox,
-  Chip,
   FormControlLabel,
   Typography,
 } from '@mui/material';
@@ -122,25 +121,11 @@ export default function FileCard({
           </Typography>
         )}
 
-        {onTagClick && tags.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {tags.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant="outlined"
-                onClick={() => onTagClick(tag)}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Box>
-        )}
-
         <TagMultiselect
           value={tags}
           options={allTags}
           onChange={(newTags) => save({ tags: newTags })}
+          onTagClick={onTagClick}
           placeholder="Теги"
         />
 

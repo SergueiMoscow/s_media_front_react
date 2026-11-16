@@ -21,9 +21,10 @@ import {
   setClusterIgnored,
 } from '../api';
 import { errorMessageFromResponse } from '../api/client';
-import type { CandidateCluster } from '../types/analyzer';
+import type { CandidateCluster, FaceCluster } from '../types/analyzer';
 import FaceThumb from './FaceThumb';
 import NameClusterDialog, { type AssignBody } from './NameClusterDialog';
+import ClusterFacesDialog from './ClusterFacesDialog';
 import EmptyState from './EmptyState';
 import { useToast } from './ToastContext';
 
@@ -46,6 +47,16 @@ export default function CandidatesDialog({
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [reassignTarget, setReassignTarget] = useState<CandidateCluster | null>(null);
+  const [viewTarget, setViewTarget] = useState<FaceCluster | null>(null);
+
+  const toCluster = (candidate: CandidateCluster): FaceCluster => ({
+    id: candidate.cluster_id,
+    size: candidate.size,
+    person_id: null,
+    person_name: null,
+    ignored: false,
+    sample_face_ids: candidate.sample_face_ids,
+  });
 
   const candidatesQuery = useQuery({
     queryKey: queryKeys.candidates(serverId, personId, {}),
@@ -141,6 +152,13 @@ export default function CandidatesDialog({
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => setViewTarget(toCluster(candidate))}
+                      >
+                        Посмотреть
+                      </Button>
                       <Button size="small" variant="outlined" onClick={() => handleSame(candidate)}>
                         Тот же
                       </Button>
@@ -180,6 +198,15 @@ export default function CandidatesDialog({
           serverId={serverId}
           onSubmit={handleReassignSubmit}
           onClose={() => setReassignTarget(null)}
+        />
+      )}
+
+      {viewTarget && (
+        <ClusterFacesDialog
+          serverId={serverId}
+          cluster={viewTarget}
+          onClustersChanged={onClustersChanged}
+          onClose={() => setViewTarget(null)}
         />
       )}
     </>
