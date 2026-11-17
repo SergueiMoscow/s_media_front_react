@@ -31,7 +31,7 @@ export default function AboutPage() {
       </Typography>
       <Typography component="p" sx={{ mb: 1.5 }}>
         Приложение «Media Explorer» — каталогизатор фото и видео: объединяет в одном месте
-        файлы, размещённые на разных компьютерах и в разных хранилищах. Состоит из следующих
+        файлы, размещённые на разных компьютерах и в разных хранилищах. Состоит из четырёх
         компонентов:
       </Typography>
 
@@ -57,12 +57,6 @@ export default function AboutPage() {
         <ListItem sx={{ display: 'list-item', pl: 0 }}>
           <b>s_media_analyzer:</b> анализ фото: поиск лиц и геотеги (FastAPI + pgvector).{' '}
           <Link href="https://github.com/SergueiMoscow/s_media_analyzer" target="_blank" rel="noreferrer">
-            Репозиторий на GitHub
-          </Link>
-        </ListItem>
-        <ListItem sx={{ display: 'list-item', pl: 0 }}>
-          <b>s_media_deploy:</b> развёртывание (Ansible).{' '}
-          <Link href="https://github.com/SergueiMoscow/s_media_deploy" target="_blank" rel="noreferrer">
             Репозиторий на GitHub
           </Link>
         </ListItem>
