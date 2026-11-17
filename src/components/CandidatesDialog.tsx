@@ -56,6 +56,8 @@ export default function CandidatesDialog({
     person_name: null,
     ignored: false,
     sample_face_ids: candidate.sample_face_ids,
+    catalog_files_count: 0,
+    total_files_count: 0,
   });
 
   const candidatesQuery = useQuery({

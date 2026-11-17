@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Alert,
   Box,
-  Button,
   Card,
   CardActionArea,
   CardActions,
@@ -10,13 +9,21 @@ import {
   Chip,
   CircularProgress,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
+import BlockIcon from '@mui/icons-material/Block';
+import UndoIcon from '@mui/icons-material/Undo';
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
+import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import {
@@ -67,7 +74,7 @@ export default function FacesPage() {
   const clustersParams: ClustersParams = {
     unassigned:
       statusFilter === 'unassigned' ? true : statusFilter === 'named' ? false : undefined,
-    ignored: statusFilter === 'ignored' ? true : undefined,
+    ignored: statusFilter === 'ignored' ? true : false,
     min_size: minSize,
     limit: LIMIT,
     offset: (page - 1) * LIMIT,
@@ -260,32 +267,54 @@ export default function FacesPage() {
                         <Chip size="small" color="warning" label="игнорируется" />
                       </Box>
                     )}
+                    {cluster.total_files_count > 0 && (
+                      <Box sx={{ mt: 0.5 }}>
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={`${cluster.catalog_files_count}/${cluster.total_files_count} в каталоге`}
+                        />
+                      </Box>
+                    )}
                   </CardContent>
                 </CardActionArea>
                 <CardActions sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-                  <Button size="small" onClick={() => setNameTarget(cluster)}>
-                    Назвать
-                  </Button>
+                  <Tooltip title="Назвать">
+                    <IconButton size="small" onClick={() => setNameTarget(cluster)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                   {cluster.person_id && (
-                    <Button size="small" onClick={() => setCandidatesTarget(cluster)}>
-                      Похожие
-                    </Button>
+                    <Tooltip title="Похожие">
+                      <IconButton size="small" onClick={() => setCandidatesTarget(cluster)}>
+                        <SearchIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   )}
-                  <Button
-                    size="small"
-                    color={cluster.ignored ? 'primary' : 'inherit'}
-                    onClick={() => handleToggleIgnore(cluster)}
-                  >
-                    {cluster.ignored ? 'Вернуть' : 'Игнорировать'}
-                  </Button>
-                  {cluster.person_name && (
-                    <Button size="small" onClick={() => handlePromoteCluster(cluster)}>
-                      Добавить все в каталог
-                    </Button>
+                  <Tooltip title={cluster.ignored ? 'Вернуть' : 'Игнорировать'}>
+                    <IconButton size="small" onClick={() => handleToggleIgnore(cluster)}>
+                      {cluster.ignored ? (
+                        <UndoIcon fontSize="small" />
+                      ) : (
+                        <BlockIcon fontSize="small" />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                  {cluster.person_name &&
+                    cluster.catalog_files_count < cluster.total_files_count && (
+                      <Tooltip title="Добавить все в каталог">
+                        <IconButton size="small" onClick={() => handlePromoteCluster(cluster)}>
+                          <LibraryAddIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  {cluster.catalog_files_count > 0 && (
+                    <Tooltip title="Убрать из каталога">
+                      <IconButton size="small" onClick={() => handleUnpromoteCluster(cluster)}>
+                        <PlaylistRemoveIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   )}
-                  <Button size="small" onClick={() => handleUnpromoteCluster(cluster)}>
-                    Убрать из каталога
-                  </Button>
                 </CardActions>
               </Card>
             ))}

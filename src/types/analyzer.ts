@@ -111,6 +111,8 @@ export interface FaceCluster {
   person_name: string | null;
   ignored: boolean;
   sample_face_ids: number[];
+  catalog_files_count: number;
+  total_files_count: number;
 }
 
 export interface Person {
@@ -146,6 +148,7 @@ export interface CandidatesParams {
 
 export interface PatchFaceBody {
   person_id?: string;
+  name?: string;
   status?: AnalyzerFaceStatus;
   unassign?: boolean;
   promote?: boolean;

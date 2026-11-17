@@ -141,7 +141,7 @@ export default function ClusterFacesDialog({
     try {
       await Promise.all(
         selectedFaceIds.map((faceId) =>
-          patchFace(serverId, faceId, { person_id: body.person_id }),
+          patchFace(serverId, faceId, { person_id: body.person_id, name: body.name }),
         ),
       );
       setSelectedFaceIds([]);
