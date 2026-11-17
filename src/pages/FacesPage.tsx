@@ -29,6 +29,7 @@ import axios from 'axios';
 import {
   assignCluster,
   fetchClusters,
+  fetchPeople,
   fetchServers,
   promoteCluster,
   queryKeys,
@@ -36,10 +37,11 @@ import {
   unpromoteCluster,
 } from '../api';
 import { errorMessageFromResponse } from '../api/client';
-import type { ClustersParams, FaceCluster } from '../types/analyzer';
+import type { ClustersParams, FaceCluster, PersonSummary } from '../types/analyzer';
 import LazyFaceThumb from '../components/LazyFaceThumb';
 import NameClusterDialog, { type AssignBody } from '../components/NameClusterDialog';
 import ClusterFacesDialog from '../components/ClusterFacesDialog';
+import PersonFacesDialog from '../components/PersonFacesDialog';
 import CandidatesDialog from '../components/CandidatesDialog';
 import EmptyState from '../components/EmptyState';
 import PaginationBar from '../components/PaginationBar';
@@ -48,19 +50,25 @@ import { analyzerErrorMessage } from '../utils/analyzer';
 
 const LIMIT = 24;
 
-type StatusFilter = 'all' | 'unassigned' | 'named' | 'ignored';
+type ModeFilter = 'people' | 'unassigned' | 'ignored';
+
+interface CandidatesTarget {
+  personId: string;
+  personName: string;
+}
 
 export default function FacesPage() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
   const [selectedServerId, setSelectedServerId] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [modeFilter, setModeFilter] = useState<ModeFilter>('people');
   const [minSize, setMinSize] = useState(2);
   const [page, setPage] = useState(1);
   const [nameTarget, setNameTarget] = useState<FaceCluster | null>(null);
   const [viewTarget, setViewTarget] = useState<FaceCluster | null>(null);
-  const [candidatesTarget, setCandidatesTarget] = useState<FaceCluster | null>(null);
+  const [personFacesTarget, setPersonFacesTarget] = useState<PersonSummary | null>(null);
+  const [candidatesTarget, setCandidatesTarget] = useState<CandidatesTarget | null>(null);
   const [assignLoading, setAssignLoading] = useState(false);
 
   const serversQuery = useQuery({ queryKey: queryKeys.servers, queryFn: fetchServers });
@@ -71,25 +79,29 @@ export default function FacesPage() {
     ? selectedServerId
     : analyzerServers[0]?.id ?? '';
 
+  const peopleParams = { limit: LIMIT, offset: (page - 1) * LIMIT };
+  const peopleQuery = useQuery({
+    queryKey: queryKeys.people(serverId, peopleParams),
+    queryFn: () => fetchPeople(serverId, peopleParams),
+    enabled: Boolean(serverId) && modeFilter === 'people',
+  });
+
   const clustersParams: ClustersParams = {
-    unassigned:
-      statusFilter === 'unassigned' ? true : statusFilter === 'named' ? false : undefined,
-    ignored: statusFilter === 'ignored' ? true : false,
+    unassigned: modeFilter === 'unassigned' ? true : undefined,
+    ignored: modeFilter === 'ignored' ? true : false,
     min_size: minSize,
     limit: LIMIT,
     offset: (page - 1) * LIMIT,
   };
-
   const clustersQuery = useQuery({
     queryKey: queryKeys.clusters(serverId, clustersParams),
     queryFn: () => fetchClusters(serverId, clustersParams),
-    enabled: Boolean(serverId),
+    enabled: Boolean(serverId) && modeFilter !== 'people',
   });
 
-  const invalidateClusters = () => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.clusters(serverId, clustersParams),
-    });
+  const invalidateList = () => {
+    queryClient.invalidateQueries({ queryKey: ['people', serverId] });
+    queryClient.invalidateQueries({ queryKey: ['clusters', serverId] });
   };
 
   const handleAssign = async (body: AssignBody) => {
@@ -98,7 +110,7 @@ export default function FacesPage() {
     try {
       await assignCluster(serverId, nameTarget.id, body);
       setNameTarget(null);
-      invalidateClusters();
+      invalidateList();
       showToast('Кластер назван', 'success');
     } catch (error) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
@@ -111,7 +123,7 @@ export default function FacesPage() {
   const handleToggleIgnore = async (cluster: FaceCluster) => {
     try {
       await setClusterIgnored(serverId, cluster.id, !cluster.ignored);
-      invalidateClusters();
+      invalidateList();
     } catch (error) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
       showToast(errorMessageFromResponse(data) || 'Ошибка', 'error');
@@ -121,7 +133,7 @@ export default function FacesPage() {
   const handlePromoteCluster = async (cluster: FaceCluster) => {
     try {
       await promoteCluster(serverId, cluster.id, cluster.person_name ?? '');
-      invalidateClusters();
+      invalidateList();
       showToast('Добавлено в каталог', 'success');
     } catch (error) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
@@ -132,7 +144,7 @@ export default function FacesPage() {
   const handleUnpromoteCluster = async (cluster: FaceCluster) => {
     try {
       await unpromoteCluster(serverId, cluster.id);
-      invalidateClusters();
+      invalidateList();
       showToast('Убрано из каталога', 'success');
     } catch (error) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
@@ -167,8 +179,12 @@ export default function FacesPage() {
     );
   }
 
+  const people = peopleQuery.data?.items ?? [];
+  const peopleTotal = peopleQuery.data?.total ?? 0;
   const clusters = clustersQuery.data?.items ?? [];
-  const total = clustersQuery.data?.total ?? 0;
+  const clustersTotal = clustersQuery.data?.total ?? 0;
+
+  const isPeopleMode = modeFilter === 'people';
 
   return (
     <Box sx={{ p: 3 }}>
@@ -197,38 +213,112 @@ export default function FacesPage() {
         </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel id="faces-status-label">Статус</InputLabel>
+          <InputLabel id="faces-mode-label">Режим</InputLabel>
           <Select
-            labelId="faces-status-label"
-            label="Статус"
-            value={statusFilter}
+            labelId="faces-mode-label"
+            label="Режим"
+            value={modeFilter}
             onChange={(event) => {
-              setStatusFilter(event.target.value as StatusFilter);
+              setModeFilter(event.target.value as ModeFilter);
               setPage(1);
             }}
           >
-            <MenuItem value="all">Все</MenuItem>
+            <MenuItem value="people">Люди</MenuItem>
             <MenuItem value="unassigned">Без имени</MenuItem>
-            <MenuItem value="named">С именем</MenuItem>
             <MenuItem value="ignored">Игнорируемые</MenuItem>
           </Select>
         </FormControl>
 
-        <TextField
-          size="small"
-          type="number"
-          label="Мин. размер"
-          value={minSize}
-          onChange={(event) => {
-            setMinSize(Math.max(1, Number(event.target.value) || 2));
-            setPage(1);
-          }}
-          slotProps={{ htmlInput: { min: 1, step: 1 } }}
-          sx={{ width: 140 }}
-        />
+        {!isPeopleMode && (
+          <TextField
+            size="small"
+            type="number"
+            label="Мин. размер"
+            value={minSize}
+            onChange={(event) => {
+              setMinSize(Math.max(1, Number(event.target.value) || 2));
+              setPage(1);
+            }}
+            slotProps={{ htmlInput: { min: 1, step: 1 } }}
+            sx={{ width: 140 }}
+          />
+        )}
       </Stack>
 
-      {clustersQuery.isLoading ? (
+      {isPeopleMode ? (
+        peopleQuery.isLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <CircularProgress />
+          </Box>
+        ) : peopleQuery.isError ? (
+          <Alert severity="warning">{analyzerErrorMessage(peopleQuery.error)}</Alert>
+        ) : people.length === 0 ? (
+          <EmptyState message="Людей нет." />
+        ) : (
+          <>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {people.map((person) => (
+                <Card key={person.person_id} sx={{ width: 200 }}>
+                  <CardActionArea onClick={() => setPersonFacesTarget(person)}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 1 }}>
+                      {person.sample_face_ids[0] != null ? (
+                        <LazyFaceThumb
+                          serverId={serverId}
+                          faceId={person.sample_face_ids[0]}
+                          size={96}
+                        />
+                      ) : (
+                        <Box
+                          sx={{ width: 96, height: 96, bgcolor: 'action.hover', borderRadius: 1 }}
+                        />
+                      )}
+                    </Box>
+                    <CardContent sx={{ pt: 1 }}>
+                      <Typography variant="body1" noWrap title={person.names[0] ?? ''}>
+                        {person.names[0] ?? 'Без имени'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {person.face_count} лиц
+                      </Typography>
+                      {person.total_files_count > 0 && (
+                        <Box sx={{ mt: 0.5 }}>
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            label={`${person.catalog_files_count}/${person.total_files_count} в каталоге`}
+                          />
+                        </Box>
+                      )}
+                    </CardContent>
+                  </CardActionArea>
+                  <CardActions sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                    <Tooltip title="Похожие">
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setCandidatesTarget({
+                            personId: person.person_id,
+                            personName: person.names[0] ?? '',
+                          })
+                        }
+                      >
+                        <SearchIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                </Card>
+              ))}
+            </Box>
+
+            <PaginationBar
+              page={page}
+              totalItems={peopleTotal}
+              perPage={LIMIT}
+              onChange={setPage}
+            />
+          </>
+        )
+      ) : clustersQuery.isLoading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
           <CircularProgress />
         </Box>
@@ -286,7 +376,15 @@ export default function FacesPage() {
                   </Tooltip>
                   {cluster.person_id && (
                     <Tooltip title="Похожие">
-                      <IconButton size="small" onClick={() => setCandidatesTarget(cluster)}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setCandidatesTarget({
+                            personId: cluster.person_id!,
+                            personName: cluster.person_name ?? '',
+                          })
+                        }
+                      >
                         <SearchIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -320,7 +418,12 @@ export default function FacesPage() {
             ))}
           </Box>
 
-          <PaginationBar page={page} totalItems={total} perPage={LIMIT} onChange={setPage} />
+          <PaginationBar
+            page={page}
+            totalItems={clustersTotal}
+            perPage={LIMIT}
+            onChange={setPage}
+          />
         </>
       )}
 
@@ -337,17 +440,26 @@ export default function FacesPage() {
         <ClusterFacesDialog
           serverId={serverId}
           cluster={viewTarget}
-          onClustersChanged={invalidateClusters}
+          onClustersChanged={invalidateList}
           onClose={() => setViewTarget(null)}
         />
       )}
 
-      {candidatesTarget && candidatesTarget.person_id && (
+      {personFacesTarget && (
+        <PersonFacesDialog
+          serverId={serverId}
+          person={personFacesTarget}
+          onListChanged={invalidateList}
+          onClose={() => setPersonFacesTarget(null)}
+        />
+      )}
+
+      {candidatesTarget && (
         <CandidatesDialog
           serverId={serverId}
-          personId={candidatesTarget.person_id}
-          personName={candidatesTarget.person_name ?? ''}
-          onClustersChanged={invalidateClusters}
+          personId={candidatesTarget.personId}
+          personName={candidatesTarget.personName}
+          onClustersChanged={invalidateList}
           onClose={() => setCandidatesTarget(null)}
         />
       )}

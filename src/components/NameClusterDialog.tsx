@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPeople, queryKeys } from '../api';
-import type { Person } from '../types/analyzer';
+import type { PersonSummary } from '../types/analyzer';
 
 export interface AssignBody {
   person_id: string;
@@ -38,7 +38,7 @@ export default function NameClusterDialog({
 }: NameClusterDialogProps) {
   const [mode, setMode] = useState<'new' | 'existing'>('new');
   const [newName, setNewName] = useState('');
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [selectedPerson, setSelectedPerson] = useState<PersonSummary | null>(null);
 
   const peopleQuery = useQuery({
     queryKey: queryKeys.people(serverId, { limit: 100 }),

@@ -120,6 +120,15 @@ export interface Person {
   names: string[];
 }
 
+export interface PersonSummary {
+  person_id: string;
+  names: string[];
+  face_count: number;
+  sample_face_ids: number[];
+  catalog_files_count: number;
+  total_files_count: number;
+}
+
 export interface ClustersParams {
   unassigned?: boolean;
   ignored?: boolean;

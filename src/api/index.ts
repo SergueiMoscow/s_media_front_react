@@ -23,7 +23,7 @@ import type {
   Page,
   PatchFaceBody,
   PeopleParams,
-  Person,
+  PersonSummary,
 } from '../types/analyzer';
 
 // ---------------------------------------------------------------------------
@@ -265,10 +265,22 @@ export async function fetchClusters(
 export async function fetchPeople(
   serverId: string,
   params: PeopleParams = {},
-): Promise<Page<Person>> {
-  const response = await apiClient.get<Page<Person>>(`/analyzer/${serverId}/people`, {
+): Promise<Page<PersonSummary>> {
+  const response = await apiClient.get<Page<PersonSummary>>(`/analyzer/${serverId}/people`, {
     params,
   });
+  return response.data;
+}
+
+export async function fetchPersonFaces(
+  serverId: string,
+  personId: string,
+  params: { limit?: number; offset?: number } = {},
+): Promise<Page<AnalyzerFace>> {
+  const response = await apiClient.get<Page<AnalyzerFace>>(
+    `/analyzer/${serverId}/people/${personId}/faces`,
+    { params },
+  );
   return response.data;
 }
 
@@ -391,6 +403,8 @@ export const queryKeys = {
     ['clusters', serverId, params] as const,
   people: (serverId: string, params: PeopleParams) =>
     ['people', serverId, params] as const,
+  personFaces: (serverId: string, personId: string, params: { limit?: number; offset?: number }) =>
+    ['personFaces', serverId, personId, params] as const,
   clusterFaces: (serverId: string, clusterId: number, params: { limit?: number; offset?: number }) =>
     ['clusterFaces', serverId, clusterId, params] as const,
   candidates: (serverId: string, personId: string, params: CandidatesParams) =>
