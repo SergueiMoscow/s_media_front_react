@@ -47,7 +47,11 @@ export default function TagMultiselect({
         })
       }
       renderInput={(params) => (
-        <TextField {...params} variant="standard" placeholder={placeholder} />
+        <TextField
+          {...params}
+          variant="standard"
+          placeholder={value.length > 0 ? '' : placeholder}
+        />
       )}
       fullWidth
     />

@@ -1,13 +1,15 @@
 import { useCallback, useState } from 'react';
 import {
   Box,
-  Button,
   Card,
   CardContent,
-  Checkbox,
   FormControlLabel,
+  IconButton,
+  Switch,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import axios from 'axios';
 import { saveFileInfo, type FileInfoPayload } from '../api';
 import { errorMessageFromResponse } from '../api/client';
@@ -145,28 +147,30 @@ export default function FileCard({
           placeholder="Теги"
         />
 
-        <FormControlLabel
-          control={
-            <Checkbox
-              size="small"
-              checked={Boolean(file.is_public)}
-              disabled={saving}
-              onChange={(event) => save({ is_public: event.target.checked })}
-            />
-          }
-          label="public"
-        />
-
-        {file.id && (
-          <Button
-            size="small"
-            color="inherit"
-            disabled={saving}
-            onClick={handleRemoveFromCatalog}
-          >
-            Убрать из каталога
-          </Button>
-        )}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={Boolean(file.is_public)}
+                disabled={saving}
+                onChange={(event) => save({ is_public: event.target.checked })}
+              />
+            }
+            label="public"
+          />
+          {file.id && (
+            <Tooltip title="Убрать из каталога">
+              <IconButton
+                size="small"
+                disabled={saving}
+                onClick={handleRemoveFromCatalog}
+              >
+                <DeleteOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'text.secondary' }}>
           <span>
