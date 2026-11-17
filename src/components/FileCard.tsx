@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Checkbox,
@@ -71,6 +72,21 @@ export default function FileCard({
     [file.id, file.name, folderPath, onChanged, server, showToast, storage],
   );
 
+  const handleRemoveFromCatalog = async () => {
+    if (!file.id) return;
+    setSaving(true);
+    try {
+      await saveFileInfo(server, storage, { id: file.id, status: 'inactive' });
+      onChanged?.();
+      showToast('Файл убран из каталога', 'success');
+    } catch (error) {
+      const data = axios.isAxiosError(error) ? error.response?.data : undefined;
+      showToast(errorMessageFromResponse(data), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Card sx={{ width: 300, display: 'flex', flexDirection: 'column' }}>
       <Box
@@ -140,6 +156,17 @@ export default function FileCard({
           }
           label="public"
         />
+
+        {file.id && (
+          <Button
+            size="small"
+            color="inherit"
+            disabled={saving}
+            onClick={handleRemoveFromCatalog}
+          >
+            Убрать из каталога
+          </Button>
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'text.secondary' }}>
           <span>

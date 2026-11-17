@@ -176,8 +176,21 @@ export async function fetchTags(serverId: string): Promise<string[]> {
 // ---------------------------------------------------------------------------
 
 export type FileInfoPayload =
-  | { id: string; note?: string; tags?: string[]; is_public?: boolean }
-  | { folder_path: string; filename: string; note?: string; tags?: string[]; is_public?: boolean };
+  | {
+      id: string;
+      note?: string;
+      tags?: string[];
+      is_public?: boolean;
+      status?: 'active' | 'inactive';
+    }
+  | {
+      folder_path: string;
+      filename: string;
+      note?: string;
+      tags?: string[];
+      is_public?: boolean;
+      status?: 'active' | 'inactive';
+    };
 
 export async function saveFileInfo(
   server: string,
@@ -320,6 +333,33 @@ export async function patchFace(
   body: PatchFaceBody,
 ): Promise<void> {
   await apiClient.patch(`/analyzer/${serverId}/faces/${faceId}`, body);
+}
+
+export async function promoteCluster(
+  serverId: string,
+  clusterId: number,
+  name: string,
+): Promise<void> {
+  await apiClient.post(`/analyzer/${serverId}/clusters/${clusterId}/promote`, { name });
+}
+
+export async function unpromoteCluster(
+  serverId: string,
+  clusterId: number,
+): Promise<void> {
+  await apiClient.post(`/analyzer/${serverId}/clusters/${clusterId}/unpromote`);
+}
+
+export async function promoteFace(
+  serverId: string,
+  faceId: number,
+  name: string,
+): Promise<void> {
+  await apiClient.post(`/analyzer/${serverId}/faces/${faceId}/promote`, { name });
+}
+
+export async function unpromoteFace(serverId: string, faceId: number): Promise<void> {
+  await apiClient.post(`/analyzer/${serverId}/faces/${faceId}/unpromote`);
 }
 
 // ---------------------------------------------------------------------------

@@ -19,7 +19,15 @@ import {
 } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { assignCluster, fetchClusters, fetchServers, queryKeys, setClusterIgnored } from '../api';
+import {
+  assignCluster,
+  fetchClusters,
+  fetchServers,
+  promoteCluster,
+  queryKeys,
+  setClusterIgnored,
+  unpromoteCluster,
+} from '../api';
 import { errorMessageFromResponse } from '../api/client';
 import type { ClustersParams, FaceCluster } from '../types/analyzer';
 import LazyFaceThumb from '../components/LazyFaceThumb';
@@ -97,6 +105,28 @@ export default function FacesPage() {
     try {
       await setClusterIgnored(serverId, cluster.id, !cluster.ignored);
       invalidateClusters();
+    } catch (error) {
+      const data = axios.isAxiosError(error) ? error.response?.data : undefined;
+      showToast(errorMessageFromResponse(data) || 'Ошибка', 'error');
+    }
+  };
+
+  const handlePromoteCluster = async (cluster: FaceCluster) => {
+    try {
+      await promoteCluster(serverId, cluster.id, cluster.person_name ?? '');
+      invalidateClusters();
+      showToast('Добавлено в каталог', 'success');
+    } catch (error) {
+      const data = axios.isAxiosError(error) ? error.response?.data : undefined;
+      showToast(errorMessageFromResponse(data) || 'Ошибка', 'error');
+    }
+  };
+
+  const handleUnpromoteCluster = async (cluster: FaceCluster) => {
+    try {
+      await unpromoteCluster(serverId, cluster.id);
+      invalidateClusters();
+      showToast('Убрано из каталога', 'success');
     } catch (error) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
       showToast(errorMessageFromResponse(data) || 'Ошибка', 'error');
@@ -247,6 +277,14 @@ export default function FacesPage() {
                     onClick={() => handleToggleIgnore(cluster)}
                   >
                     {cluster.ignored ? 'Вернуть' : 'Игнорировать'}
+                  </Button>
+                  {cluster.person_name && (
+                    <Button size="small" onClick={() => handlePromoteCluster(cluster)}>
+                      Добавить все в каталог
+                    </Button>
+                  )}
+                  <Button size="small" onClick={() => handleUnpromoteCluster(cluster)}>
+                    Убрать из каталога
                   </Button>
                 </CardActions>
               </Card>

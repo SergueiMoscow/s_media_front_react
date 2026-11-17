@@ -9,14 +9,22 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   IconButton,
+  Switch,
   Typography,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { fetchClusterFaces, patchFace, queryKeys } from '../api';
+import {
+  fetchClusterFaces,
+  patchFace,
+  promoteFace,
+  queryKeys,
+  unpromoteFace,
+} from '../api';
 import { errorMessageFromResponse } from '../api/client';
 import { fileUrl, previewUrl } from '../utils/media';
 import type { AnalyzerFace, AnalyzerFaceStatus, FaceCluster } from '../types/analyzer';
@@ -102,6 +110,19 @@ export default function ClusterFacesDialog({
   const handleUnassign = async (face: AnalyzerFace) => {
     try {
       await patchFace(serverId, face.id, { unassign: true });
+      invalidate();
+    } catch (error) {
+      handleError(error, 'Ошибка');
+    }
+  };
+
+  const handleToggleCatalog = async (face: AnalyzerFace) => {
+    try {
+      if (face.catalog_file_id != null) {
+        await unpromoteFace(serverId, face.id);
+      } else {
+        await promoteFace(serverId, face.id, face.person_name ?? '');
+      }
       invalidate();
     } catch (error) {
       handleError(error, 'Ошибка');
@@ -229,6 +250,18 @@ export default function ClusterFacesDialog({
                         <CloseIcon fontSize="small" />
                       </IconButton>
                     </Box>
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          size="small"
+                          checked={face.catalog_file_id != null}
+                          onChange={() => handleToggleCatalog(face)}
+                        />
+                      }
+                      label={<Typography variant="caption">в каталоге</Typography>}
+                      sx={{ m: 0 }}
+                    />
 
                     {face.person_id && (
                       <Button
